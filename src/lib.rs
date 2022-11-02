@@ -146,7 +146,7 @@ impl AtomicBorrow {
 
 /// A guard that releases a shared reference when dropped.
 pub struct SharedGuard<'a, T> {
-    data: &'a T,
+    data: *const T,
     borrow: &'a AtomicBorrow,
 }
 
@@ -165,10 +165,7 @@ impl<'a, T> SharedGuard<'a, T> {
     #[inline]
     pub unsafe fn try_new(data: *const T, borrow: &'a AtomicBorrow) -> Option<Self> {
         if borrow.borrow() {
-            Some(Self {
-                data: unsafe { &*data },
-                borrow,
-            })
+            Some(Self { data, borrow })
         } else {
             None
         }
@@ -182,10 +179,19 @@ impl<'a, T> SharedGuard<'a, T> {
     #[inline]
     pub unsafe fn spin(data: *const T, borrow: &'a AtomicBorrow) -> Self {
         borrow.spin_borrow();
-        Self {
-            data: unsafe { &*data },
-            borrow,
-        }
+        Self { data, borrow }
+    }
+
+    #[inline]
+    pub fn ptr(&self) -> *const T {
+        self.data
+    }
+
+    #[inline]
+    pub fn forget(self) -> *const T {
+        let ptr = self.ptr();
+        std::mem::forget(self);
+        ptr
     }
 }
 
@@ -194,7 +200,7 @@ impl<'a, T> Deref for SharedGuard<'a, T> {
 
     #[inline]
     fn deref(&self) -> &Self::Target {
-        self.data
+        unsafe { &*self.data }
     }
 }
 
@@ -207,7 +213,7 @@ impl<'a, T> Drop for SharedGuard<'a, T> {
 
 /// A guard that releases a unique reference when dropped.
 pub struct UniqueGuard<'a, T> {
-    data: &'a mut T,
+    data: *mut T,
     borrow: &'a AtomicBorrow,
 }
 
@@ -226,10 +232,7 @@ impl<'a, T> UniqueGuard<'a, T> {
     #[inline]
     pub unsafe fn try_new(data: *mut T, borrow: &'a AtomicBorrow) -> Option<Self> {
         if borrow.borrow_mut() {
-            Some(Self {
-                data: unsafe { &mut *data },
-                borrow,
-            })
+            Some(Self { data, borrow })
         } else {
             None
         }
@@ -243,10 +246,19 @@ impl<'a, T> UniqueGuard<'a, T> {
     #[inline]
     pub unsafe fn spin(data: *mut T, borrow: &'a AtomicBorrow) -> Self {
         borrow.spin_borrow_mut();
-        Self {
-            data: unsafe { &mut *data },
-            borrow,
-        }
+        Self { data, borrow }
+    }
+
+    #[inline]
+    pub fn ptr(&self) -> *mut T {
+        self.data
+    }
+
+    #[inline]
+    pub fn forget(self) -> *mut T {
+        let ptr = self.ptr();
+        std::mem::forget(self);
+        ptr
     }
 }
 
@@ -255,14 +267,14 @@ impl<'a, T> Deref for UniqueGuard<'a, T> {
 
     #[inline]
     fn deref(&self) -> &Self::Target {
-        self.data
+        unsafe { &*self.data }
     }
 }
 
 impl<'a, T> DerefMut for UniqueGuard<'a, T> {
     #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {
-        self.data
+        unsafe { &mut *self.data }
     }
 }
 
