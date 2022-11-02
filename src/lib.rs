@@ -182,11 +182,19 @@ impl<'a, T> SharedGuard<'a, T> {
         Self { data, borrow }
     }
 
+    /// Gets the inner [`AtomicBorrow`].
+    #[inline]
+    pub fn get_borrow(&self) -> &AtomicBorrow {
+        self.borrow
+    }
+
+    /// Gets the inner data.
     #[inline]
     pub fn ptr(&self) -> *const T {
         self.data
     }
 
+    /// Gets the inner data without releasing the borrow.
     #[inline]
     pub fn forget(self) -> *const T {
         let ptr = self.ptr();
@@ -249,11 +257,19 @@ impl<'a, T> UniqueGuard<'a, T> {
         Self { data, borrow }
     }
 
+    /// Gets the inner [`AtomicBorrow`].
+    #[inline]
+    pub fn get_borrow(&self) -> &AtomicBorrow {
+        self.borrow
+    }
+
+    /// Gets the inner data.
     #[inline]
     pub fn ptr(&self) -> *mut T {
         self.data
     }
 
+    /// Gets the inner data without releasing the borrow.
     #[inline]
     pub fn forget(self) -> *mut T {
         let ptr = self.ptr();
