@@ -268,3 +268,27 @@ impl<'a, T> Drop for UniqueGuard<'a, T> {
         self.borrow.release_mut();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn atomic_borrow() {
+        let borrow = AtomicBorrow::new();
+
+        assert!(borrow.borrow());
+        assert!(borrow.borrow());
+
+        assert!(!borrow.borrow_mut());
+
+        borrow.release();
+        borrow.release();
+
+        assert!(borrow.borrow_mut());
+
+        assert!(!borrow.borrow());
+
+        borrow.release_mut();
+    }
+}
