@@ -184,7 +184,7 @@ impl<'a, T> SharedGuard<'a, T> {
 
     /// Gets the inner [`AtomicBorrow`].
     #[inline]
-    pub fn get_borrow(&self) -> &AtomicBorrow {
+    pub fn get_borrow(&self) -> &'a AtomicBorrow {
         self.borrow
     }
 
@@ -259,7 +259,7 @@ impl<'a, T> UniqueGuard<'a, T> {
 
     /// Gets the inner [`AtomicBorrow`].
     #[inline]
-    pub fn get_borrow(&self) -> &AtomicBorrow {
+    pub fn get_borrow(&self) -> &'a AtomicBorrow {
         self.borrow
     }
 
