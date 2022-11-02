@@ -161,6 +161,7 @@ impl<'a, T> SharedGuard<'a, T> {
     ///
     /// # Safety
     /// * Any borrows of `data` must be registered with `borrow`.
+    /// * `data` must be a valid pointer for the entire lifetime of `self`.
     #[inline]
     pub unsafe fn try_new(data: *const T, borrow: &'a AtomicBorrow) -> Option<Self> {
         if borrow.borrow() {
@@ -177,6 +178,7 @@ impl<'a, T> SharedGuard<'a, T> {
     ///
     /// # Safety
     /// * Any borrows of `data` must be registered with `borrow`.
+    /// * `data` must be a valid pointer for the entire lifetime of `self`.
     #[inline]
     pub unsafe fn spin(data: *const T, borrow: &'a AtomicBorrow) -> Self {
         borrow.spin_borrow();
@@ -220,6 +222,7 @@ impl<'a, T> UniqueGuard<'a, T> {
     ///
     /// # Safety
     /// * Any borrows of `data` must be registered with `borrow`.
+    /// * `data` must be a valid pointer for the entire lifetime of `self`.
     #[inline]
     pub unsafe fn try_new(data: *mut T, borrow: &'a AtomicBorrow) -> Option<Self> {
         if borrow.borrow_mut() {
@@ -236,6 +239,7 @@ impl<'a, T> UniqueGuard<'a, T> {
     ///
     /// # Safety
     /// * Any borrows of `data` must be registered with `borrow`.
+    /// * `data` must be a valid pointer for the entire lifetime of `self`.
     #[inline]
     pub unsafe fn spin(data: *mut T, borrow: &'a AtomicBorrow) -> Self {
         borrow.spin_borrow_mut();
